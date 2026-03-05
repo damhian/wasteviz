@@ -1,102 +1,62 @@
-import Image, { type ImageProps } from "next/image";
-import { Button } from "@repo/ui/button";
-import styles from "./page.module.css";
+export const dynamic = 'force-dynamic';
 
-type Props = Omit<ImageProps, "src"> & {
-  srcLight: string;
-  srcDark: string;
-};
+import React from "react";
+import { InteractiveTpsMap } from "@/components/InteractiveTpsMap";
+import { TPSLocation, TPSDropOff } from "@/components/InteractiveTpsMap";
+import { getWeatherForLocation } from "@/lib/weather";
 
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
+// Pre-define the default center as requested: Denpasar [-8.6500, 115.2167]
+const DENPASAR_CENTER: [number, number] = [-8.6500, 115.2167];
+
+async function fetchTpsData(): Promise<TPSLocation[]> {
+  try {
+    // const res = await fetch("http://localhost:4000/api/tps", { cache: "no-store" });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/tps`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch TPS");
+    return await res.json();
+  } catch (error) {
+    console.error("Fastify TPS fetch error:", error);
+    return [];
+  }
+}
+
+async function fetchDropOffData(): Promise<TPSDropOff[]> {
+  try {
+    // const res = await fetch("http://localhost:4000/api/drop-offs", { cache: "no-store" });
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/drop-offs`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch drop-offs");
+    return await res.json();
+  } catch (error) {
+    console.error("Fastify dropoffs fetch error:", error);
+    return [];
+  }
+}
+
+export default async function HomePage() {
+  // Fetch everything concurrently from the server
+  const [tpsData, dropOffData, weatherData] = await Promise.all([
+    fetchTpsData(),
+    fetchDropOffData(),
+    getWeatherForLocation(DENPASAR_CENTER[0], DENPASAR_CENTER[1]),
+  ]);
 
   return (
-    <>
-      <Image {...rest} src={srcLight} className="imgLight" />
-      <Image {...rest} src={srcDark} className="imgDark" />
-    </>
-  );
-};
-
-export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <ThemeImage
-          className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-          priority
+    <main className="h-screen max-h-screen bg-background text-foreground flex flex-col pt-6 px-6 md:pt-10 md:px-10 pb-6 md:pb-10 overflow-hidden">
+      <header className="mb-6">
+        <h1 className="text-3xl font-bold tracking-tight text-primary">WasteViz Operations Dashboard</h1>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Live monitoring of waste drop-offs and capacity levels across {tpsData.length} locations.
+        </p>
+      </header>
+      
+      <section className="flex-1 rounded-xl overflow-hidden border border-border shadow-md">
+        <InteractiveTpsMap 
+          tpsData={tpsData}
+          dropOffData={dropOffData}
+          weatherData={weatherData}
+          initialCenter={DENPASAR_CENTER}
         />
-        <ol>
-          <li>
-            Get started by editing <code>apps/web/app/page.tsx</code>
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new/clone?demo-description=Learn+to+implement+a+monorepo+with+a+two+Next.js+sites+that+has+installed+three+local+packages.&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F4K8ZISWAzJ8X1504ca0zmC%2F0b21a1c6246add355e55816278ef54bc%2FBasic.png&demo-title=Monorepo+with+Turborepo&demo-url=https%3A%2F%2Fexamples-basic-web.vercel.sh%2F&from=templates&project-name=Monorepo+with+Turborepo&repository-name=monorepo-turborepo&repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fturborepo%2Ftree%2Fmain%2Fexamples%2Fbasic&root-directory=apps%2Fdocs&skippable-integrations=1&teamSlug=vercel&utm_source=create-turbo"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://turborepo.dev/docs?utm_source"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-        <Button appName="web" className={styles.secondary}>
-          Open alert
-        </Button>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com/templates?search=turborepo&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://turborepo.dev?utm_source=create-turbo"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to turborepo.dev →
-        </a>
-      </footer>
-    </div>
+      </section>
+    </main>
   );
 }

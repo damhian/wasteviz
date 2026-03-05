@@ -1,0 +1,15 @@
+Resolving dependencies
+Resolved, downloaded and extracted [2]
+Saved lockfile
+- Preflight checks.
+✔ Preflight checks.
+- Verifying framework.
+✔ Verifying framework. Found Next.js.
+- Validating Tailwind CSS config. Found v4.
+✔ Validating Tailwind CSS config. Found v4.
+- Validating import alias.
+✖ Validating import alias.
+
+No import alias found in your tsconfig.json file.
+Visit https://ui.shadcn.com/docs/installation/next to learn how to set an import alias.
+

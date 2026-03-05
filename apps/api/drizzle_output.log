@@ -1,0 +1,41 @@
+No config path provided, using default 'drizzle.config.ts'
+Reading config file 'D:\Projects\Personal_Project\porto\wasteviz\apps\api\drizzle.config.ts'
+[dotenv@17.3.1] injecting env (1) from ..\..\.env.local -- tip: ⚡️ secrets for agents: https://dotenvx.com/as2
+Using '@neondatabase/serverless' driver for database querying
+ Warning  '@neondatabase/serverless' can only connect to remote Neon/Vercel Postgres/Supabase instances through a websocket
+[⣷] Pulling schema from database...
+[2K[1G[⣯] Pulling schema from database...
+[2K[1G[⣟] Pulling schema from database...
+[2K[1G[⡿] Pulling schema from database...
+[2K[1G[⢿] Pulling schema from database...
+[2K[1G[⣻] Pulling schema from database...
+[2K[1G[⣽] Pulling schema from database...
+[2K[1G[⣷] Pulling schema from database...
+[2K[1G[⣯] Pulling schema from database...
+[2K[1G[⣟] Pulling schema from database...
+[2K[1G[✓] Pulling schema from database...
+error: cannot drop type waste_type because other objects depend on it
+    at file:///D:/Projects/Personal_Project/porto/wasteviz/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Object.query (D:\Projects\Personal_Project\porto\wasteviz\node_modules\drizzle-kit\bin.cjs:80824:26)
+    at async pgPush (D:\Projects\Personal_Project\porto\wasteviz\node_modules\drizzle-kit\bin.cjs:84485:13)
+    at async Object.handler (D:\Projects\Personal_Project\porto\wasteviz\node_modules\drizzle-kit\bin.cjs:93943:9)
+    at async run (D:\Projects\Personal_Project\porto\wasteviz\node_modules\drizzle-kit\bin.cjs:93189:7) {
+  length: 255,
+  severity: 'ERROR',
+  code: '2BP01',
+  detail: 'column waste_type of table dropoffs depends on type waste_type',
+  hint: 'Use DROP ... CASCADE to drop the dependent objects too.',
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'dependency.c',
+  line: '1148',
+  routine: 'reportDependentObjects'
+}

@@ -1,0 +1,51 @@
+[dotenv@17.3.1] injecting env (1) from ..\..\.env.local -- tip: ⚙️  write to custom object with { processEnv: myObject }
+Applying migrations...
+36 |   async queryWithCache(queryString, params, query) {
+37 |     if (this.cache === void 0 || is(this.cache, NoopCache) || this.queryMetadata === void 0) {
+38 |       try {
+39 |         return await query();
+40 |       } catch (e) {
+41 |         throw new DrizzleQueryError(queryString, params, e);
+                   ^
+error: Failed query: CREATE TABLE "bali_tps" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"lat" double precision NOT NULL,
+	"lng" double precision NOT NULL,
+	"capacityStatus" varchar(50) NOT NULL
+);
+
+params: 
+  query: "CREATE TABLE \"bali_tps\" (\n\t\"id\" serial PRIMARY KEY NOT NULL,\n\t\"name\" varchar(255) NOT NULL,\n\t\"lat\" double precision NOT NULL,\n\t\"lng\" double precision NOT NULL,\n\t\"capacityStatus\" varchar(50) NOT NULL\n);\n",
+ params: [],
+
+      at queryWithCache (D:\Projects\Personal_Project\porto\wasteviz\node_modules\drizzle-orm\pg-core\session.js:41:15)
+
+1293 | `Error connecting to database: ${ee}`);throw M.sourceError=ee,M}if(ye.ok){let ee=await ye.json();if(Array.
+1294 | isArray(P)){let M=ee.results;if(!Array.isArray(M))throw new be("Neon internal error: unexpected resu\
+1295 | lt format");return M.map(($,me)=>{let Ot=I[me]??{},vo=Ot.arrayMode??se,xo=Ot.fullResults??oe;return os(
+1296 | $,{arrayMode:vo,fullResults:xo,types:Ot.types})})}else{let M=I??{},$=M.arrayMode??se,me=M.fullResults??
+1297 | oe;return os(ee,{arrayMode:$,fullResults:me,types:M.types})}}else{let{status:ee}=ye;if(ee===400){let M=await ye.
+1298 | json(),$=new be(M.message);for(let me of Ru)$[me]=M[me]??void 0;throw $}else{let M=await ye.text();throw new be(
+                ^
+NeonDbError: relation "bali_tps" already exists
+   severity: "ERROR",
+     detail: undefined,
+       hint: undefined,
+   position: undefined,
+ internalPosition: undefined,
+ internalQuery: undefined,
+      where: undefined,
+     schema: undefined,
+      table: undefined,
+       line: "1160",
+     column: undefined,
+   dataType: undefined,
+ constraint: undefined,
+       file: "heap.c",
+    routine: "heap_create_with_catalog",
+ sourceError: undefined,
+       code: "42P07"
+
+      at Y (D:\Projects\Personal_Project\porto\wasteviz\node_modules\@neondatabase\serverless\index.mjs:1298:10)
+
