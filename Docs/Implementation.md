@@ -127,7 +127,7 @@
   - Route `GET /api/health` → returns `{ status: "ok", timestamp: Date.now() }`
   - Route `GET /api/drop-offs` → calls `dropOffRepository.findAll()`, returns JSON
   - Listen on `PORT` env or default `4000`
-- [ ] Add `dev` script to `apps/api/package.json`:
+- [x] Add `dev` script to `apps/api/package.json`:
   ```json
   "scripts": {
     "dev": "bun run src/server.ts",
@@ -143,11 +143,12 @@
 
 **Estimated time: 2–3 hours**
 
-- [x] Create `app/api/weather/route.ts` (Next.js Route Handler)  (Not needed since we fetch directly in Server Component, but technically complete via app/page.tsx logic)
-  - Accepts `?lat=&lng=` query params
+- [x] Create `app/actions/weather.ts` (Next.js Server Action)
+  - Accepts `lat` and `lng` arguments
   - Fetches from Open-Meteo: `https://api.open-meteo.com/v1/forecast`
-  - Returns JSON — server-side only, no API key needed (Open-Meteo is free & open)
-- [x] Create `components/map/TpsMap.tsx` / `InteractiveTpsMap.tsx`
+  - Fetches radar timestamp from RainViewer
+  - Proxies data to client components without exposing logic.
+- [x] Create `components/InteractiveTpsMap.tsx`
   - Add `"use client"` directive at top
   - Use `mapcn` to render a MapLibre map centered on Denpasar `[115.2167, -8.6500]`
   - ⚠️ **Coordinate Order:** `mapcn`/MapLibre uses `[Lng, Lat]` — reversed from Google Maps!
@@ -163,6 +164,20 @@
   - Pass data as props to `<TpsMap />`
 - [x] Update `app/layout.tsx` with global Tailwind styles
 - [x] Delete `app/globals.css` default Next.js styles and replace with clean Tailwind base
+
+---
+
+## Phase 5: Driver Ledger Flow & Responsive UI (Upcoming)
+
+**Estimated time: 2–3 hours**
+
+- [ ] Create `/ledger` route in `apps/web/app/`
+- [ ] Implement paginated data table using Shadcn `Table` for drop-offs
+- [ ] Build "Log New Drop-off" form using Shadcn `Dialog` (POST to API)
+- [ ] Build "Archive" action with confirmation dialog (DELETE to API)
+- [ ] Implement responsive left sidebar TPS list using Shadcn `ScrollArea`
+- [ ] Implement mobile bottom-sheet view for Map TPS details (`sm` breakpoint)
+- [ ] Fix Accessibility (a11y): Add `tabIndex={0}` and keyboard events to map markers, `aria-label` to buttons.
 
 ---
 
@@ -183,13 +198,13 @@ apps/api:
 
 ## Verification Checklist
 
-- [ ] `bun run dev` (from root) starts both `web` (port 3000) and `api` (port 4000)
-- [ ] `GET http://localhost:4000/api/health` returns `{ status: "ok" }`
-- [ ] `GET http://localhost:4000/api/drop-offs` returns an array (possibly empty)
-- [ ] `http://localhost:3000` renders the map centered on Denpasar
-- [ ] Clicking a TPS marker shows its name + capacity status
-- [ ] Records with `deletedAt` set do NOT appear in the UI
-- [ ] `bunx drizzle-kit studio` shows `bali_tps` and `bali_waste_drop_offs` tables
+- [x] `bun run dev` (from root) starts both `web` (port 3000) and `api` (port 4000)
+- [x] `GET http://localhost:4000/api/health` returns `{ status: "ok" }`
+- [x] `GET http://localhost:4000/api/drop-offs` returns an array (possibly empty)
+- [x] `http://localhost:3000` renders the map centered on Denpasar
+- [x] Clicking a TPS marker shows its name + capacity status
+- [x] Records with `deletedAt` set do NOT appear in the UI
+- [x] `bunx drizzle-kit studio` shows `bali_tps` and `bali_waste_drop_offs` tables
 
 ---
 

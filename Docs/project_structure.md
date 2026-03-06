@@ -42,17 +42,15 @@ apps/web/
 │   ├── layout.tsx                   ← Root layout (Server Component)
 │   ├── page.tsx                     ← Home page (Server Component — fetches weather)
 │   ├── globals.css                  ← Global CSS (Tailwind directives)
-│   └── api/
-│       └── weather/
-│           └── route.ts             ← Next.js Route Handler: proxies Open-Meteo API
+│   └── actions/
+│       └── weather.ts               ← Next.js Server Action: proxies Open-Meteo API
 ├── components/
+│   ├── InteractiveTpsMap.tsx        ← [CLIENT "use client"] mapcn map wrapper & markers
 │   ├── map/
-│   │   ├── TpsMap.tsx               ← [CLIENT "use client"] mapcn map wrapper
-│   │   ├── TpsMarker.tsx            ← [CLIENT] Individual TPS marker with popup
 │   │   └── WeatherRadarLayer.tsx    ← [CLIENT] RainViewer radar layer toggle
 │   └── ui/                         ← Shadcn UI auto-generated components
 ├── lib/
-│   └── api-client.ts               ← Typed fetch helpers for /api/drop-offs
+│   └── weather.ts                  ← Open-Meteo & RainViewer fetching logic
 ├── public/
 │   └── ...                         ← Static assets
 ├── .gitignore
@@ -67,8 +65,8 @@ apps/web/
 | File Type | Rule |
 |---|---|
 | `app/page.tsx` | Server Component — fetches Open-Meteo, passes data as props |
-| `components/map/TpsMap.tsx` | Must have `"use client"` — uses `mapcn` (browser API) |
-| `app/api/weather/route.ts` | Server-only — never exposes API keys |
+| `components/InteractiveTpsMap.tsx` | Must have `"use client"` — uses `mapcn` (browser API) |
+| `app/actions/weather.ts` | Server-only Action — never exposes logical fetch implementation |
 
 ---
 
