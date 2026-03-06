@@ -205,6 +205,7 @@ apps/api:
 - [x] Clicking a TPS marker shows its name + capacity status
 - [x] Records with `deletedAt` set do NOT appear in the UI
 - [x] `bunx drizzle-kit studio` shows `bali_tps` and `bali_waste_drop_offs` tables
+- [x] Vitest tests passing in `apps/web`
 
 ---
 

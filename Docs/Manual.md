@@ -81,4 +81,28 @@ To spin up the project locally:
 
 This single command utilizes Turborepo to simultaneously boot the Next.js frontend (Port 3000) and the Fastify backend (Port 4000).
 
+---
+
+## 🧪 6. Testing Strategy
+
+We use **Vitest** for isolated unit testing. The tests are designed to execute independently of the live server or Next.js build process, making them safe to run without affecting production environments.
+
+### How to Run Tests
+To run the test suite for the frontend (which currently includes isolated utility and logic tests):
+
+1. Navigate to the web application directory:
+   ```bash
+   cd apps/web
+   ```
+2. Execute the test runner:
+   ```bash
+   bun run test
+   ```
+   *(This runs `vitest run` under the hood).*
+
+**When writing new tests:**
+- Always name the test file adjacent to the file it tests (e.g., `weather.ts` → `weather.test.ts`).
+- Focus on isolated functions (like data mappers, formatting utilities, or simple repositories) rather than complex UI component rendering unless strictly necessary.
+
 *Happy coding, and keep Bali clean!*
+
