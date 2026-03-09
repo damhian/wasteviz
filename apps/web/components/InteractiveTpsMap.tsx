@@ -265,7 +265,7 @@ export function InteractiveTpsMap({
       </Card>
 
       {/* Map Container */}
-      <div className="relative flex-1 h-full min-h-[400px] md:min-h-[600px] overflow-hidden isolate rounded-xl border border-border shadow-md">
+      <div className="relative flex-1 h-full min-h-[400px] md:min-h-0 overflow-hidden isolate rounded-xl border border-border shadow-md">
         {/* Absolute Weather Dashboard Overlay */}
         {localWeather && (
           <Card className="absolute top-4 left-4 z-10 w-64 bg-[#0A2F1D]/90 backdrop-blur-md border-none text-white shadow-lg">
