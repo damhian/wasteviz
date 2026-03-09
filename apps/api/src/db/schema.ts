@@ -1,4 +1,12 @@
-import { pgTable, serial, text, doublePrecision, integer, timestamp, varchar } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  serial,
+  text,
+  doublePrecision,
+  integer,
+  timestamp,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 export const bali_tps = pgTable("bali_tps", {
   id: serial("id").primaryKey(),
@@ -6,11 +14,14 @@ export const bali_tps = pgTable("bali_tps", {
   lat: doublePrecision("lat").notNull(),
   lng: doublePrecision("lng").notNull(),
   capacityStatus: varchar("capacityStatus", { length: 50 }).notNull(), // e.g., 'OK', 'WARNING', 'CRITICAL'
+  maxCapacityKg: doublePrecision("maxCapacityKg").notNull().default(5000), // Default 5 tons
 });
 
 export const bali_waste_drop_offs = pgTable("bali_waste_drop_offs", {
   id: serial("id").primaryKey(),
-  tpsId: integer("tpsId").references(() => bali_tps.id).notNull(),
+  tpsId: integer("tpsId")
+    .references(() => bali_tps.id)
+    .notNull(),
   driverName: varchar("driverName", { length: 255 }).notNull(),
   volumeKg: doublePrecision("volumeKg").notNull(),
   droppedAt: timestamp("droppedAt").defaultNow().notNull(),

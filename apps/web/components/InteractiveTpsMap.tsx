@@ -1,8 +1,17 @@
 "use client";
 
 import React, { useMemo, useState, useEffect, useRef } from "react";
-import { Map, MapMarker, MarkerPopup, MapControls, MarkerContent, type MapViewport, type MapRef } from "@/components/ui/map";
+import {
+  Map,
+  MapMarker,
+  MarkerPopup,
+  MapControls,
+  MarkerContent,
+  type MapViewport,
+  type MapRef,
+} from "@/components/ui/map";
 import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { CloudRainWind, ThermometerSun } from "lucide-react";
 import { WeatherData } from "@/lib/weather";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -21,6 +30,7 @@ export interface TPSLocation {
   lat: number;
   lng: number;
   capacityStatus: string;
+  maxCapacityKg: number;
 }
 
 export interface TPSDropOff {
@@ -44,14 +54,25 @@ export function InteractiveTpsMap({
   weatherData,
   initialCenter,
 }: InteractiveTpsMapProps) {
-
-  const [localWeather, setLocalWeather] = useState<WeatherData | null>(weatherData || null);
+  const [localWeather, setLocalWeather] = useState<WeatherData | null>(
+    weatherData || null,
+  );
   const [viewport, setViewport] = useState<MapViewport>({
     center: [initialCenter[1], initialCenter[0]], // [lng, lat]
     zoom: 10,
     bearing: 0,
     pitch: 0,
   });
+  const [selectedTpsId, setSelectedTpsId] = useState<number | null>(null);
+
+  const handleSelectTps = (tps: TPSLocation) => {
+    setSelectedTpsId(tps.id);
+    mapRef.current?.flyTo({
+      center: [Number(tps.lng), Number(tps.lat)],
+      zoom: 14,
+      duration: 1000,
+    });
+  };
 
   const styles = {
     default: undefined,
@@ -78,7 +99,6 @@ export function InteractiveTpsMap({
       if (newWeather) {
         setLocalWeather(newWeather);
       }
-
     }, 1000);
 
     return () => clearTimeout(timer);
@@ -86,67 +106,171 @@ export function InteractiveTpsMap({
 
   const markers = useMemo(() => {
     return tpsData.map((tps) => {
-      
-      const relatedDropOffs = dropOffData.filter(d => d.tpsId === tps.id);
-      
-      const lastDropOff = relatedDropOffs.length > 0 
-        ? new Date(Math.max(...relatedDropOffs.map(e => new Date(e.droppedAt).getTime()))) 
-        : null;
+      const relatedDropOffs = dropOffData.filter((d) => d.tpsId === tps.id);
+
+      const lastDropOff =
+        relatedDropOffs.length > 0
+          ? new Date(
+              Math.max(
+                ...relatedDropOffs.map((e) => new Date(e.droppedAt).getTime()),
+              ),
+            )
+          : null;
 
       // Calculate total volume received
-      const totalVolume = relatedDropOffs.reduce((sum, dropoff) => sum + dropoff.volumeKg, 0);
+      const totalVolume = relatedDropOffs.reduce(
+        (sum, dropoff) => sum + dropoff.volumeKg,
+        0,
+      );
 
       let color = "#22c55e"; // OK - Green
       if (tps.capacityStatus === "WARNING") color = "#f59e0b"; // WARNING - Yellow
       if (tps.capacityStatus === "CRITICAL") color = "#ef4444"; // CRITICAL - Red
 
       return (
-        <MapMarker key={tps.id} longitude={Number(tps.lng)} latitude={Number(tps.lat)}>
+        <MapMarker
+          key={tps.id}
+          longitude={Number(tps.lng)}
+          latitude={Number(tps.lat)}>
           <MarkerContent>
-            <div 
-              className="relative h-4 w-4 rounded-full border-2 border-background shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-transform hover:scale-125 hover:z-50"
-              style={{ backgroundColor: color }}
-            />
+            <div
+              className={`relative flex items-center justify-center cursor-pointer transition-transform duration-300 hover:z-50 ${selectedTpsId === tps.id ? "scale-150" : "hover:scale-125"}`}
+              onClick={() => handleSelectTps(tps)}>
+              {(tps.capacityStatus === "CRITICAL" ||
+                tps.capacityStatus === "WARNING") && (
+                <div
+                  className="absolute inset-0 rounded-full animate-ping opacity-75"
+                  style={{ backgroundColor: color }}
+                />
+              )}
+              <div
+                className={`relative h-4 w-4 rounded-full border-2 border-background shadow-md ${selectedTpsId === tps.id ? "ring-2 ring-primary/50 ring-offset-2 ring-offset-background" : ""}`}
+                style={{ backgroundColor: color }}
+              />
+            </div>
           </MarkerContent>
           <MarkerPopup>
             <div className="flex flex-col gap-2 p-1 max-w-[200px] text-foreground">
-              <h3 className="font-bold text-sm border-b border-border pb-1">{tps.name}</h3>
+              <h3 className="font-bold text-sm border-b border-border pb-1">
+                {tps.name}
+              </h3>
               <div className="flex justify-between items-center text-xs">
                 <span className="text-muted-foreground">Capacity Status:</span>
-                <span className={`font-semibold ${
-                  tps.capacityStatus === 'CRITICAL' ? 'text-destructive' : 
-                  tps.capacityStatus === 'WARNING' ? 'text-warning' : 'text-primary'
-                }`}>
+                <span
+                  className={`font-semibold ${
+                    tps.capacityStatus === "CRITICAL"
+                      ? "text-destructive"
+                      : tps.capacityStatus === "WARNING"
+                        ? "text-warning"
+                        : "text-primary"
+                  }`}>
                   {tps.capacityStatus}
                 </span>
               </div>
-              
+
               <div className="flex justify-between items-center text-xs">
                 <span className="text-muted-foreground">Total Volume:</span>
-                <span className="font-semibold">{totalVolume.toFixed(2)} kg</span>
+                <span className="font-semibold">
+                  {totalVolume.toFixed(2)} kg
+                </span>
               </div>
-              
+
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-muted-foreground">Location Max:</span>
+                <span className="font-semibold">
+                  {tps.maxCapacityKg?.toLocaleString() || "5,000"} kg
+                </span>
+              </div>
+
               {lastDropOff && (
                 <div className="text-[10px] text-muted-foreground mt-1 border-t border-border/50 pt-1">
                   Last delivery: {lastDropOff.toLocaleString()}
                 </div>
               )}
-
             </div>
           </MarkerPopup>
         </MapMarker>
       );
     });
-  }, [tpsData, dropOffData]);
+  }, [tpsData, dropOffData, selectedTpsId]);
 
   return (
-    <div className="relative w-full h-full min-h-[600px] overflow-hidden isolate">
-      
-      {/* Absolute Weather Dashboard Overlay */}
-      {localWeather && (
-        <Card className="absolute top-4 left-4 z-10 w-64 bg-[#0A2F1D]/90 backdrop-blur-md border-none text-white shadow-lg">
-          <CardContent className="p-5 flex flex-col">
-             <div className="flex justify-between items-start w-full">
+    <div className="flex w-full h-full gap-4">
+      {/* Left Sidebar TPS List */}
+      <Card className="w-80 h-full hidden md:flex flex-col shadow-md border-border overflow-hidden bg-card/95 backdrop-blur-sm">
+        <div className="p-4 border-b border-border bg-muted/30 shrink-0">
+          <h2 className="font-semibold tracking-tight text-lg">
+            TPS Locations
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            {tpsData.length} facilities monitored
+          </p>
+        </div>
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="p-3 space-y-2">
+            {tpsData.map((tps) => {
+              const isSelected = selectedTpsId === tps.id;
+
+              let badgeColor =
+                "bg-green-500/20 text-green-700 dark:text-green-400";
+              let dotColor = "bg-green-500";
+              if (tps.capacityStatus === "WARNING") {
+                badgeColor =
+                  "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400";
+                dotColor = "bg-yellow-500";
+              }
+              if (tps.capacityStatus === "CRITICAL") {
+                badgeColor =
+                  "bg-red-500/20 text-red-700 dark:text-red-400 animate-pulse";
+                dotColor = "bg-red-500";
+              }
+
+              return (
+                <button
+                  key={tps.id}
+                  onClick={() => handleSelectTps(tps)}
+                  className={`w-full text-left px-3 py-3 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-primary/50 relative overflow-hidden group ${
+                    isSelected
+                      ? "bg-primary/10 border-primary/30 border shadow-sm"
+                      : "hover:bg-muted border border-transparent"
+                  }`}>
+                  <div className="flex justify-between items-start mb-1.5">
+                    <span
+                      className={`font-semibold text-sm ${isSelected ? "text-primary" : "text-foreground group-hover:text-primary"} transition-colors`}>
+                      {tps.name}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-end">
+                    <span
+                      className={`flex w-fit items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider ${badgeColor}`}>
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${dotColor}`}
+                      />
+                      {tps.capacityStatus}
+                    </span>
+
+                    <span className="text-[10px] text-muted-foreground font-medium">
+                      {dropOffData
+                        .filter((d) => d.tpsId === tps.id)
+                        .reduce((sum, d) => sum + d.volumeKg, 0)
+                        .toFixed(0)}{" "}
+                      kg
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </ScrollArea>
+      </Card>
+
+      {/* Map Container */}
+      <div className="relative flex-1 h-full min-h-[600px] overflow-hidden isolate rounded-xl border border-border shadow-md">
+        {/* Absolute Weather Dashboard Overlay */}
+        {localWeather && (
+          <Card className="absolute top-4 left-4 z-10 w-64 bg-[#0A2F1D]/90 backdrop-blur-md border-none text-white shadow-lg">
+            <CardContent className="p-5 flex flex-col">
+              <div className="flex justify-between items-start w-full">
                 <ThermometerSun className="w-8 h-8 text-green-300 opacity-80" />
                 <div className="text-right">
                   <span className="block font-bold text-lg leading-tight tracking-wide">
@@ -159,35 +283,43 @@ export function InteractiveTpsMap({
                     {localWeather.temperature.toFixed(1)}°C
                   </span>
                 </div>
-             </div>
-             
-             <div className="mt-4 pt-3 border-t border-green-800/50 flex flex-col items-end gap-1">
-               <span className="text-xs font-medium text-green-200/80">
-                 Feels {localWeather.feelsLike.toFixed(1)}°C • Wind {localWeather.windSpeed.toFixed(1)} km/h
-               </span>
-               {localWeather.precipitation > 0 && (
-                 <span className="text-xs font-bold text-blue-300 flex items-center gap-1">
-                   <CloudRainWind className="w-3 h-3" /> {localWeather.precipitation} mm rain
-                 </span>
-               )}
-             </div>
-          </CardContent>
-        </Card>
-      )}
+              </div>
 
-      <Map 
-        viewport={viewport}
-        onViewportChange={setViewport}
-        ref={mapRef}
-        styles={
-            selectedStyle ?  {light: selectedStyle, dark: selectedStyle} : undefined
+              <div className="mt-4 pt-3 border-t border-green-800/50 flex flex-col items-end gap-1">
+                <span className="text-xs font-medium text-green-200/80">
+                  Feels {localWeather.feelsLike.toFixed(1)}°C • Wind{" "}
+                  {localWeather.windSpeed.toFixed(1)} km/h
+                </span>
+                {localWeather.precipitation > 0 && (
+                  <span className="text-xs font-bold text-blue-300 flex items-center gap-1">
+                    <CloudRainWind className="w-3 h-3" />{" "}
+                    {localWeather.precipitation} mm rain
+                  </span>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <Map
+          viewport={viewport}
+          onViewportChange={setViewport}
+          ref={mapRef}
+          styles={
+            selectedStyle
+              ? { light: selectedStyle, dark: selectedStyle }
+              : undefined
           }
-        theme="dark"
-      >
-        <MapControls position="bottom-right" showCompass showZoom showFullscreen />
-        {markers}
-      </Map>
-      <div className="absolute top-8 right-12 z-10 flex flex-col gap-2">
+          theme="dark">
+          <MapControls
+            position="bottom-right"
+            showCompass
+            showZoom
+            showFullscreen
+          />
+          {markers}
+        </Map>
+        <div className="absolute top-8 right-12 z-10 flex flex-col gap-2">
           {/* <select
             value={style}
             onChange={(e) => setStyle(e.target.value as StyleKey)}
@@ -197,47 +329,42 @@ export function InteractiveTpsMap({
             <option value="openstreetmap">OpenStreetMap</option>
             <option value="openstreetmap3d">OpenStreetMap 3D</option>
           </select> */}
-        <Select 
-          value={style} 
-          onValueChange={(value) => setStyle(value as StyleKey)}
-        >
-          <SelectTrigger className="w-[200px] bg-white/40 backdrop-blur-md border border-white/40 text-gray-800 rounded-lg px-3 py-1.5 text-sm shadow-[0_4px_30px_rgba(0,0,0,0.1)] outline-none cursor-pointer hover:bg-white/50 transition-colors font-medium">
-            <SelectValue placeholder="Select a map style" />
-          </SelectTrigger>
-          
-          <SelectContent
-            position="popper" 
-            side="bottom" 
-            sideOffset={4} 
-            className="bg-white/60 backdrop-blur-xl border border-white/40 shadow-2xl rounded-lg max-h-48 overflow-y-auto z-[9999]">
-            <SelectItem 
-              value="default" 
-              className="cursor-pointer hover:bg-white/60 focus:bg-white/60 text-gray-900 font-medium"
-            >
-              Default (Carto)
-            </SelectItem>
-            <SelectItem 
-              value="openstreetmap" 
-              className="cursor-pointer hover:bg-white/60 focus:bg-white/60 text-gray-900 font-medium"
-            >
-              OpenStreetMap
-            </SelectItem>
-            <SelectItem 
-              value="openstreetmap3d" 
-              className="cursor-pointer hover:bg-white/60 focus:bg-white/60 text-gray-900 font-medium"
-            >
-              OpenStreetMap 3D
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div 
+          <Select
+            value={style}
+            onValueChange={(value) => setStyle(value as StyleKey)}>
+            <SelectTrigger className="w-[200px] bg-white/40 backdrop-blur-md border border-white/40 text-gray-800 rounded-lg px-3 py-1.5 text-sm shadow-[0_4px_30px_rgba(0,0,0,0.1)] outline-none cursor-pointer hover:bg-white/50 transition-colors font-medium">
+              <SelectValue placeholder="Select a map style" />
+            </SelectTrigger>
+
+            <SelectContent
+              position="popper"
+              side="bottom"
+              sideOffset={4}
+              className="bg-white/60 backdrop-blur-xl border border-white/40 shadow-2xl rounded-lg max-h-48 overflow-y-auto z-[9999]">
+              <SelectItem
+                value="default"
+                className="cursor-pointer hover:bg-white/60 focus:bg-white/60 text-gray-900 font-medium">
+                Default (Carto)
+              </SelectItem>
+              <SelectItem
+                value="openstreetmap"
+                className="cursor-pointer hover:bg-white/60 focus:bg-white/60 text-gray-900 font-medium">
+                OpenStreetMap
+              </SelectItem>
+              <SelectItem
+                value="openstreetmap3d"
+                className="cursor-pointer hover:bg-white/60 focus:bg-white/60 text-gray-900 font-medium">
+                OpenStreetMap 3D
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div
           className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-wrap gap-x-3 gap-y-1 text-xs font-mono backdrop-blur-md px-3 py-2 rounded-xl border shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-colors duration-300 ${
-    style === 'default' 
-      ? 'bg-black/50 border-white/10 text-gray-100' // Dark map styling
-      : 'bg-white/40 border-white/40 text-gray-800' // Light map styling
-  }`}
-        >
+            style === "default"
+              ? "bg-black/50 border-white/10 text-gray-100" // Dark map styling
+              : "bg-white/40 border-white/40 text-gray-800" // Light map styling
+          }`}>
           <span>
             <span className="opacity-70">lang:</span>{" "}
             {viewport.center[0].toFixed(3)}
@@ -247,8 +374,7 @@ export function InteractiveTpsMap({
             {viewport.center[1].toFixed(3)}
           </span>
           <span>
-            <span className="opacity-70">zoom:</span>{" "}
-            {viewport.zoom.toFixed(1)}
+            <span className="opacity-70">zoom:</span> {viewport.zoom.toFixed(1)}
           </span>
           <span>
             <span className="opacity-70">bearing:</span>{" "}
@@ -259,6 +385,7 @@ export function InteractiveTpsMap({
             {viewport.pitch.toFixed(1)}°
           </span>
         </div>
+      </div>
     </div>
   );
 }
