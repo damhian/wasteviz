@@ -64,6 +64,20 @@ export function InteractiveTpsMap({
     pitch: 0,
   });
   const [selectedTpsId, setSelectedTpsId] = useState<number | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+  const [webGLSupported, setWebGLSupported] = useState(true);
+
+  useEffect(() => {
+    setIsMounted(true);
+    try {
+      const canvas = document.createElement("canvas");
+      const gl =
+        canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+      setWebGLSupported(!!gl);
+    } catch (e) {
+      setWebGLSupported(false);
+    }
+  }, []);
 
   const handleSelectTps = (tps: TPSLocation) => {
     setSelectedTpsId(tps.id);
@@ -301,26 +315,44 @@ export function InteractiveTpsMap({
           </Card>
         )}
 
-        <Map
-          viewport={viewport}
-          onViewportChange={setViewport}
-          ref={mapRef}
-          styles={
-            selectedStyle
-              ? { light: selectedStyle, dark: selectedStyle }
-              : undefined
-          }
-          theme="dark">
-          <MapControls
-            position="bottom-right"
-            showCompass
-            showZoom
-            showFullscreen
-          />
-          {markers}
-        </Map>
-        <div className="absolute top-8 right-12 z-10 flex flex-col gap-2">
-          {/* <select
+        {!isMounted ? null : !webGLSupported ? (
+          <div className="flex w-full h-full items-center justify-center bg-muted/10 p-4">
+            <div className="text-center max-w-sm mt-32 md:mt-0">
+              <h2 className="text-xl font-bold text-destructive mb-3">
+                Hardware Acceleration Required
+              </h2>
+              <p className="text-muted-foreground text-sm mb-4">
+                This interactive map requires WebGL to render. Your browser or
+                device does not have hardware acceleration enabled.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Please enable hardware acceleration in your browser settings or
+                use a supported device to view the map.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <Map
+              viewport={viewport}
+              onViewportChange={setViewport}
+              ref={mapRef}
+              styles={
+                selectedStyle
+                  ? { light: selectedStyle, dark: selectedStyle }
+                  : undefined
+              }
+              theme="dark">
+              <MapControls
+                position="bottom-right"
+                showCompass
+                showZoom
+                showFullscreen
+              />
+              {markers}
+            </Map>
+            <div className="absolute top-8 right-12 z-10 flex flex-col gap-2">
+              {/* <select
             value={style}
             onChange={(e) => setStyle(e.target.value as StyleKey)}
             className="bg-white/40 backdrop-blur-md border border-white/40 text-gray-800 rounded-lg px-3 py-1.5 text-sm shadow-[0_4px_30px_rgba(0,0,0,0.1)] outline-none cursor-pointer hover:bg-white/50 transition-colors"
@@ -329,62 +361,65 @@ export function InteractiveTpsMap({
             <option value="openstreetmap">OpenStreetMap</option>
             <option value="openstreetmap3d">OpenStreetMap 3D</option>
           </select> */}
-          <Select
-            value={style}
-            onValueChange={(value) => setStyle(value as StyleKey)}>
-            <SelectTrigger className="w-[200px] bg-white/40 backdrop-blur-md border border-white/40 text-gray-800 rounded-lg px-3 py-1.5 text-sm shadow-[0_4px_30px_rgba(0,0,0,0.1)] outline-none cursor-pointer hover:bg-white/50 transition-colors font-medium">
-              <SelectValue placeholder="Select a map style" />
-            </SelectTrigger>
+              <Select
+                value={style}
+                onValueChange={(value) => setStyle(value as StyleKey)}>
+                <SelectTrigger className="w-[200px] bg-white/40 backdrop-blur-md border border-white/40 text-gray-800 rounded-lg px-3 py-1.5 text-sm shadow-[0_4px_30px_rgba(0,0,0,0.1)] outline-none cursor-pointer hover:bg-white/50 transition-colors font-medium">
+                  <SelectValue placeholder="Select a map style" />
+                </SelectTrigger>
 
-            <SelectContent
-              position="popper"
-              side="bottom"
-              sideOffset={4}
-              className="bg-white/60 backdrop-blur-xl border border-white/40 shadow-2xl rounded-lg max-h-48 overflow-y-auto z-[9999]">
-              <SelectItem
-                value="default"
-                className="cursor-pointer hover:bg-white/60 focus:bg-white/60 text-gray-900 font-medium">
-                Default (Carto)
-              </SelectItem>
-              <SelectItem
-                value="openstreetmap"
-                className="cursor-pointer hover:bg-white/60 focus:bg-white/60 text-gray-900 font-medium">
-                OpenStreetMap
-              </SelectItem>
-              <SelectItem
-                value="openstreetmap3d"
-                className="cursor-pointer hover:bg-white/60 focus:bg-white/60 text-gray-900 font-medium">
-                OpenStreetMap 3D
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div
-          className={`absolute bottom-9 left-1/2 -translate-x-1/2 z-10 flex flex-wrap gap-x-3 gap-y-1 text-xs font-mono backdrop-blur-md px-3 py-2 rounded-xl border shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-colors duration-300 ${
-            style === "default"
-              ? "bg-black/50 border-white/10 text-gray-100" // Dark map styling
-              : "bg-white/40 border-white/40 text-gray-800" // Light map styling
-          }`}>
-          <span>
-            <span className="opacity-70">lang:</span>{" "}
-            {viewport.center[0].toFixed(3)}
-          </span>
-          <span>
-            <span className="opacity-70">lat:</span>{" "}
-            {viewport.center[1].toFixed(3)}
-          </span>
-          <span>
-            <span className="opacity-70">zoom:</span> {viewport.zoom.toFixed(1)}
-          </span>
-          <span>
-            <span className="opacity-70">bearing:</span>{" "}
-            {viewport.bearing.toFixed(1)}°
-          </span>
-          <span>
-            <span className="opacity-70">pitch:</span>{" "}
-            {viewport.pitch.toFixed(1)}°
-          </span>
-        </div>
+                <SelectContent
+                  position="popper"
+                  side="bottom"
+                  sideOffset={4}
+                  className="bg-white/60 backdrop-blur-xl border border-white/40 shadow-2xl rounded-lg max-h-48 overflow-y-auto z-[9999]">
+                  <SelectItem
+                    value="default"
+                    className="cursor-pointer hover:bg-white/60 focus:bg-white/60 text-gray-900 font-medium">
+                    Default (Carto)
+                  </SelectItem>
+                  <SelectItem
+                    value="openstreetmap"
+                    className="cursor-pointer hover:bg-white/60 focus:bg-white/60 text-gray-900 font-medium">
+                    OpenStreetMap
+                  </SelectItem>
+                  <SelectItem
+                    value="openstreetmap3d"
+                    className="cursor-pointer hover:bg-white/60 focus:bg-white/60 text-gray-900 font-medium">
+                    OpenStreetMap 3D
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div
+              className={`absolute bottom-9 left-1/2 -translate-x-1/2 z-10 flex flex-wrap gap-x-3 gap-y-1 text-xs font-mono backdrop-blur-md px-3 py-2 rounded-xl border shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-colors duration-300 ${
+                style === "default"
+                  ? "bg-black/50 border-white/10 text-gray-100" // Dark map styling
+                  : "bg-white/40 border-white/40 text-gray-800" // Light map styling
+              }`}>
+              <span>
+                <span className="opacity-70">lang:</span>{" "}
+                {viewport.center[0].toFixed(3)}
+              </span>
+              <span>
+                <span className="opacity-70">lat:</span>{" "}
+                {viewport.center[1].toFixed(3)}
+              </span>
+              <span>
+                <span className="opacity-70">zoom:</span>{" "}
+                {viewport.zoom.toFixed(1)}
+              </span>
+              <span>
+                <span className="opacity-70">bearing:</span>{" "}
+                {viewport.bearing.toFixed(1)}°
+              </span>
+              <span>
+                <span className="opacity-70">pitch:</span>{" "}
+                {viewport.pitch.toFixed(1)}°
+              </span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
