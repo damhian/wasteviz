@@ -268,24 +268,24 @@ export function InteractiveTpsMap({
       <div className="relative flex-1 h-full min-h-[400px] md:min-h-0 overflow-hidden isolate rounded-xl border border-border shadow-md">
         {/* Absolute Weather Dashboard Overlay */}
         {localWeather && (
-          <Card className="absolute top-4 left-4 z-10 w-64 bg-[#0A2F1D]/90 backdrop-blur-md border-none text-white shadow-lg">
+          <Card className="absolute top-4 left-4 z-10 w-48 bg-[#0A2F1D]/90 backdrop-blur-md border-none text-white shadow-lg">
             <CardContent className="p-5 flex flex-col">
               <div className="flex justify-between items-start w-full">
-                <ThermometerSun className="w-8 h-8 text-green-300 opacity-80" />
+                <ThermometerSun className="w-6 h-6 text-green-300 opacity-80" />
                 <div className="text-right">
-                  <span className="block font-bold text-lg leading-tight tracking-wide">
+                  <span className="block font-bold text-md leading-tight tracking-wide">
                     {localWeather.locationName}
                   </span>
-                  <span className="block font-bold text-lg leading-tight tracking-wide text-green-100">
+                  <span className="block font-bold text-md leading-tight tracking-wide text-green-100">
                     {localWeather.condition}
                   </span>
-                  <span className="block text-4xl font-bold tracking-tighter mt-1">
+                  <span className="block text-2xl font-bold tracking-tighter mt-1">
                     {localWeather.temperature.toFixed(1)}°C
                   </span>
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-green-800/50 flex flex-col items-end gap-1">
+              <div className="mt-2 pt-2 border-t border-green-800/50 flex flex-col items-end gap-1">
                 <span className="text-xs font-medium text-green-200/80">
                   Feels {localWeather.feelsLike.toFixed(1)}°C • Wind{" "}
                   {localWeather.windSpeed.toFixed(1)} km/h
@@ -360,7 +360,7 @@ export function InteractiveTpsMap({
           </Select>
         </div>
         <div
-          className={`absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-wrap gap-x-3 gap-y-1 text-xs font-mono backdrop-blur-md px-3 py-2 rounded-xl border shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-colors duration-300 ${
+          className={`absolute bottom-9 left-1/2 -translate-x-1/2 z-10 flex flex-wrap gap-x-3 gap-y-1 text-xs font-mono backdrop-blur-md px-3 py-2 rounded-xl border shadow-[0_4px_30px_rgba(0,0,0,0.1)] transition-colors duration-300 ${
             style === "default"
               ? "bg-black/50 border-white/10 text-gray-100" // Dark map styling
               : "bg-white/40 border-white/40 text-gray-800" // Light map styling
