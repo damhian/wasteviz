@@ -58,7 +58,7 @@ export default async function HomePage() {
         </p>
       </header>
 
-      <section className="flex-1 flex gap-4 min-h-0">
+      <section className="flex-1 flex flex-col md:flex-row gap-4 min-h-0">
         <InteractiveTpsMap
           tpsData={tpsData}
           dropOffData={dropOffData}

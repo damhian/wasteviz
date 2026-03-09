@@ -11,19 +11,19 @@
 
 WasteViz uses a **dark operational dashboard** aesthetic — suitable for waste operations staff monitoring maps in various lighting conditions.
 
-| Token | Hex | Usage |
-|---|---|---|
-| `--background` | `#0f1117` | Page background |
-| `--foreground` | `#f4f4f5` | Primary text |
-| `--card` | `#1a1d27` | Card backgrounds |
-| `--card-foreground` | `#e2e8f0` | Card text |
-| `--primary` | `#22c55e` | Actions, success (waste = green) |
-| `--primary-foreground` | `#0f172a` | Text on primary |
-| `--destructive` | `#ef4444` | Danger, critical capacity, delete |
-| `--muted` | `#27293d` | Subtle backgrounds |
-| `--border` | `#2d3148` | Borders & dividers |
-| `--accent` | `#3b82f6` | Links, map accent |
-| `--warning` | `#f59e0b` | Capacity warnings, weather alerts |
+| Token                  | Hex       | Usage                             |
+| ---------------------- | --------- | --------------------------------- |
+| `--background`         | `#0f1117` | Page background                   |
+| `--foreground`         | `#f4f4f5` | Primary text                      |
+| `--card`               | `#1a1d27` | Card backgrounds                  |
+| `--card-foreground`    | `#e2e8f0` | Card text                         |
+| `--primary`            | `#22c55e` | Actions, success (waste = green)  |
+| `--primary-foreground` | `#0f172a` | Text on primary                   |
+| `--destructive`        | `#ef4444` | Danger, critical capacity, delete |
+| `--muted`              | `#27293d` | Subtle backgrounds                |
+| `--border`             | `#2d3148` | Borders & dividers                |
+| `--accent`             | `#3b82f6` | Links, map accent                 |
+| `--warning`            | `#f59e0b` | Capacity warnings, weather alerts |
 
 ### Typography
 
@@ -41,7 +41,9 @@ Scale:
 ```
 
 ### Spacing System
+
 Follows Tailwind's default scale. Common patterns:
+
 - Panel padding: `p-4` or `p-6`
 - Card gaps: `gap-4`
 - Map container: `h-screen` or `h-[calc(100vh-64px)]`
@@ -52,25 +54,27 @@ Follows Tailwind's default scale. Common patterns:
 
 ### Shadcn UI Components Used
 
-| Component | Usage Location | Notes |
-|---|---|---|
-| `Card` | TPS info panel, stats | Wrap all data panels |
-| `Badge` | Capacity status labels | `green` = OK, `yellow` = Warning, `red` = Critical |
-| `Button` | Radar toggle, ledger actions | Use `variant="outline"` for map buttons |
-| `Table` | Drop-off ledger view | Paginated; only show non-deleted records |
-| `Dialog` | Drop-off log form (future) | Confirm before soft-delete |
-| `Tooltip` | Map marker labels | Show TPS name on hover |
-| `Skeleton` | Loading state for map/data | Always show while data is fetching |
-| `Alert` | Weather warnings | `variant="destructive"` for severe weather |
-| `ScrollArea` | Left sidebar TPS list | Scrollable marker list |
+| Component    | Usage Location               | Notes                                              |
+| ------------ | ---------------------------- | -------------------------------------------------- |
+| `Card`       | TPS info panel, stats        | Wrap all data panels                               |
+| `Badge`      | Capacity status labels       | `green` = OK, `yellow` = Warning, `red` = Critical |
+| `Button`     | Radar toggle, ledger actions | Use `variant="outline"` for map buttons            |
+| `Table`      | Drop-off ledger view         | Paginated; only show non-deleted records           |
+| `Dialog`     | Drop-off log form (future)   | Confirm before soft-delete                         |
+| `Tooltip`    | Map marker labels            | Show TPS name on hover                             |
+| `Skeleton`   | Loading state for map/data   | Always show while data is fetching                 |
+| `Alert`      | Weather warnings             | `variant="destructive"` for severe weather         |
+| `ScrollArea` | Left sidebar TPS list        | Scrollable marker list                             |
 
 ### Custom Components
 
 #### `TpsMap.tsx` (Client Component)
+
 ```
 Responsibilities:
   - Render mapcn map canvas
   - Layer management (satellite, radar, markers)
+  - Synchronize state with Left Sidebar click events
   - Center: [115.2167, -8.6500] (Denpasar, Bali)
   - Default zoom: 11
 
@@ -80,13 +84,15 @@ Props:
 ```
 
 #### `TpsMarker.tsx` (Client Component)
+
 ```
 Responsibilities:
   - Render a mapcn Marker at [lng, lat]
+  - Show animated `animate-ping` pulse ring if capacityStatus is WARNING or CRITICAL
   - Show Popup on click with:
     - TPS Name
-    - Capacity Status Badge
-    - Weather Warning (if applicable)
+    - Capacity status badge
+    - Total Volume vs Max Capacity (kg)
     - Last drop-off timestamp
 
 Props:
@@ -95,6 +101,7 @@ Props:
 ```
 
 #### `WeatherRadarLayer.tsx` (Client Component)
+
 ```
 Responsibilities:
   - Fetch RainViewer timestamps from https://api.rainviewer.com/public/weather-maps.json
@@ -116,22 +123,22 @@ State:
 [Open Dashboard: localhost:3000]
         │
         ▼
-[Map loads — centered on Denpasar]
-  (Skeleton shown while tiles load)
+[Map & Sidebar load]
         │
         ▼
-[TPS Markers appear — color-coded by capacity]
-  🟢 Green  = Capacity OK
-  🟡 Yellow = Near capacity (>70%)
-  🔴 Red    = Critical (>90%) or overflowing
+[TPS Markers appear & Sidebar populates list]
+  🟢 Green  = OK (< 65%)
+  🟡 Yellow = Warning (65% - 79%) + Animated Pulse Filter
+  🔴 Red    = Critical (> 80%) + Animated Pulse Filter
         │
-        ├──── [Click a marker]
+        ├──── [Click a marker OR click a sidebar item]
         │         │
         │         ▼
-        │     [Popup appears]
+        │     [Map flyTo Location & Highlight in Sidebar]
+        │     [Popup appears containing:]
         │     - TPS Name
         │     - Capacity status badge
-        │     - Live weather alert (if rain/storm)
+        │     - Volume / Max Capacity metrics
         │     - Last drop-off recorded
         │
         └──── [Toggle Radar Button]
@@ -167,11 +174,11 @@ State:
 
 ## Responsive Design Requirements
 
-| Breakpoint | Layout |
-|---|---|
-| `sm` (< 640px) | Map full screen, bottom sheet for TPS info |
-| `md` (640–1024px) | Map 60%, sidebar 40% |
-| `lg` (> 1024px) | Map 70%, sidebar 30%, full stats cards |
+| Breakpoint        | Layout                                     |
+| ----------------- | ------------------------------------------ |
+| `sm` (< 640px)    | Map full screen, bottom sheet for TPS info |
+| `md` (640–1024px) | Map 60%, sidebar 40%                       |
+| `lg` (> 1024px)   | Map 70%, sidebar 30%, full stats cards     |
 
 The map container must always be at least `h-[400px]` on mobile and `h-screen` on desktop.
 
@@ -190,11 +197,13 @@ The map container must always be at least `h-[400px]` on mobile and `h-screen` o
 ## Style Guide & Branding
 
 ### Brand Identity
+
 - **Name:** WasteViz
-- **Tagline:** *Real-time waste intelligence for Bali's operations teams.*
+- **Tagline:** _Real-time waste intelligence for Bali's operations teams._
 - **Icon concept:** Map pin + recycle symbol combined; primary green color (`#22c55e`).
 
 ### Tailwind Class Conventions
+
 ```tsx
 // ✅ DO: Use design-token variables
 className="bg-card text-card-foreground border-border"
@@ -236,7 +245,9 @@ apps/web/components/
 ## User Journey Maps
 
 ### Journey 1: Morning Operations Check
+
 **Persona:** Municipal Waste Manager (Pak Wayan)
+
 1. Opens dashboard on desktop at 7:00 AM
 2. Scans map for red markers (critical TPS sites)
 3. Enables radar layer to check for morning rain
@@ -244,7 +255,9 @@ apps/web/components/
 5. Calls logistics team to prioritize that route
 
 ### Journey 2: End-of-Day Ledger Audit
+
 **Persona:** Facility Admin (Bu Sari)
+
 1. Opens drop-off ledger at 5:00 PM
 2. Reviews all drop-offs logged today
 3. Archives (soft-deletes) a duplicate entry
@@ -254,13 +267,13 @@ apps/web/components/
 
 ## Design Tool Integration
 
-| Tool | Purpose |
-|---|---|
-| **Shadcn UI** | Component scaffolding (`bunx shadcn add <component>`) |
-| **Tailwind CSS IntelliSense** | VS Code extension for class autocompletion |
-| **MapLibre GL JS Docs** | Reference for mapcn layer/source APIs |
-| **mapcn npm** | Check component API for markers and popups |
+| Tool                          | Purpose                                               |
+| ----------------------------- | ----------------------------------------------------- |
+| **Shadcn UI**                 | Component scaffolding (`bunx shadcn add <component>`) |
+| **Tailwind CSS IntelliSense** | VS Code extension for class autocompletion            |
+| **MapLibre GL JS Docs**       | Reference for mapcn layer/source APIs                 |
+| **mapcn npm**                 | Check component API for markers and popups            |
 
 ---
 
-*Last Updated: 2026-03-05*
+_Last Updated: 2026-03-09_

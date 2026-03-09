@@ -7,19 +7,19 @@
 
 ## Tech Stack Reference
 
-| Technology | Role | Official Docs |
-|---|---|---|
-| **Bun** | Package Manager & Runtime | https://bun.sh/docs |
-| **Turborepo** | Monorepo Build System | https://turbo.build/repo/docs |
-| **Next.js 15** | Frontend Framework (App Router) | https://nextjs.org/docs |
-| **Fastify** | Backend HTTP Server | https://fastify.dev/docs/latest/ |
-| **Drizzle ORM** | Type-safe ORM | https://orm.drizzle.team/docs/overview |
-| **Neon** | Serverless PostgreSQL | https://neon.tech/docs/introduction |
-| **mapcn** | Map Component (MapLibre GL JS) | https://www.npmjs.com/package/mapcn |
-| **Tailwind CSS** | Utility-first CSS | https://tailwindcss.com/docs |
-| **Shadcn UI** | Component Library | https://ui.shadcn.com/docs |
-| **Vitest** | Testing Framework | https://vitest.dev/guide/ |
-| **Open-Meteo** | Free Weather API | https://open-meteo.com/en/docs |
+| Technology       | Role                            | Official Docs                          |
+| ---------------- | ------------------------------- | -------------------------------------- |
+| **Bun**          | Package Manager & Runtime       | https://bun.sh/docs                    |
+| **Turborepo**    | Monorepo Build System           | https://turbo.build/repo/docs          |
+| **Next.js 15**   | Frontend Framework (App Router) | https://nextjs.org/docs                |
+| **Fastify**      | Backend HTTP Server             | https://fastify.dev/docs/latest/       |
+| **Drizzle ORM**  | Type-safe ORM                   | https://orm.drizzle.team/docs/overview |
+| **Neon**         | Serverless PostgreSQL           | https://neon.tech/docs/introduction    |
+| **mapcn**        | Map Component (MapLibre GL JS)  | https://www.npmjs.com/package/mapcn    |
+| **Tailwind CSS** | Utility-first CSS               | https://tailwindcss.com/docs           |
+| **Shadcn UI**    | Component Library               | https://ui.shadcn.com/docs             |
+| **Vitest**       | Testing Framework               | https://vitest.dev/guide/              |
+| **Open-Meteo**   | Free Weather API                | https://open-meteo.com/en/docs         |
 
 ---
 
@@ -28,16 +28,19 @@
 ### Categorized Features
 
 **Client-Side (Browser Required):**
+
 - Interactive map with `mapcn` — must use `"use client"`
 - Clickable TPS markers with popups
 - Weather radar layer toggle (RainViewer via `mapcn`)
 
 **Server-Side (No Browser):**
+
 - Weather data fetching from Open-Meteo API
 - All database queries (via Repository Pattern)
 - Environment variable access (DATABASE_URL)
 
 **API Layer (Fastify):**
+
 - `GET /api/health` — connectivity check
 - `GET /api/drop-offs` — returns non-deleted waste drop-off records
 - `POST /api/drop-offs` (future) — log a new drop-off
@@ -94,7 +97,7 @@
 
 - [x] Create `.env.local` at workspace root (empty, to be filled by user)
 - [x] Create `apps/api/src/db/schema.ts`
-  - Table: `bali_tps` — `id`, `name`, `lat`, `lng`, `capacityStatus`
+  - Table: `bali_tps` — `id`, `name`, `lat`, `lng`, `capacityStatus`, `maxCapacityKg`
   - Table: `bali_waste_drop_offs` — `id`, `tpsId` (FK), `driverName`, `volumeKg`, `droppedAt`, `deletedAt`
 - [x] Create `apps/api/src/db/index.ts`
   - Initialize Neon serverless connection
@@ -171,11 +174,11 @@
 
 **Estimated time: 2–3 hours**
 
-- [ ] Create `/ledger` route in `apps/web/app/`
+- [ ] Build `/ledger` route in `apps/web/app/`
 - [ ] Implement paginated data table using Shadcn `Table` for drop-offs
 - [ ] Build "Log New Drop-off" form using Shadcn `Dialog` (POST to API)
 - [ ] Build "Archive" action with confirmation dialog (DELETE to API)
-- [ ] Implement responsive left sidebar TPS list using Shadcn `ScrollArea`
+- [x] Implement responsive left sidebar TPS list using Shadcn `ScrollArea` (Synchronized with Map)
 - [ ] Implement mobile bottom-sheet view for Map TPS details (`sm` breakpoint)
 - [ ] Fix Accessibility (a11y): Add `tabIndex={0}` and keyboard events to map markers, `aria-label` to buttons.
 
@@ -209,4 +212,4 @@ apps/api:
 
 ---
 
-*Last Updated: 2026-03-05*
+_Last Updated: 2026-03-09_

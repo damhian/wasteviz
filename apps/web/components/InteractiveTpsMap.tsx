@@ -195,9 +195,9 @@ export function InteractiveTpsMap({
   }, [tpsData, dropOffData, selectedTpsId]);
 
   return (
-    <div className="flex w-full h-full gap-4">
+    <div className="flex flex-col md:flex-row w-full h-full gap-4">
       {/* Left Sidebar TPS List */}
-      <Card className="w-80 h-full hidden md:flex flex-col shadow-md border-border overflow-hidden bg-card/95 backdrop-blur-sm">
+      <Card className="w-full md:w-80 h-1/3 md:h-full flex flex-col shadow-md border-border overflow-hidden bg-card/95 backdrop-blur-sm">
         <div className="p-4 border-b border-border bg-muted/30 shrink-0">
           <h2 className="font-semibold tracking-tight text-lg">
             TPS Locations
@@ -265,7 +265,7 @@ export function InteractiveTpsMap({
       </Card>
 
       {/* Map Container */}
-      <div className="relative flex-1 h-full min-h-[600px] overflow-hidden isolate rounded-xl border border-border shadow-md">
+      <div className="relative flex-1 h-full min-h-[400px] md:min-h-[600px] overflow-hidden isolate rounded-xl border border-border shadow-md">
         {/* Absolute Weather Dashboard Overlay */}
         {localWeather && (
           <Card className="absolute top-4 left-4 z-10 w-64 bg-[#0A2F1D]/90 backdrop-blur-md border-none text-white shadow-lg">
