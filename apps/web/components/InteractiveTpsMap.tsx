@@ -229,7 +229,7 @@ export function InteractiveTpsMap({
                 <button
                   key={tps.id}
                   onClick={() => handleSelectTps(tps)}
-                  className={`w-full text-left px-3 py-3 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-primary/50 relative overflow-hidden group ${
+                  className={`w-full text-left px-3 py-3 rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-primary/50 relative overflow-hidden group cursor-pointer ${
                     isSelected
                       ? "bg-primary/10 border-primary/30 border shadow-sm"
                       : "hover:bg-muted border border-transparent"
